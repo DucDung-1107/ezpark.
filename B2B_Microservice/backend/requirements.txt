@@ -1,0 +1,31 @@
+# Web framework
+fastapi
+uvicorn[standard]
+
+# ORM / DB
+sqlmodel
+sqlalchemy
+psycopg2-binary   # PostgreSQL driver
+
+# Env / config
+python-dotenv
+
+# Request / HTTP
+requests
+httpx
+
+# Parsing / validation / upload
+pydantic
+python-multipart
+
+# Templating / static
+Jinja2
+
+# Utilities
+python-dateutil
+
+# Optional (monitoring / errors)
+sentry-sdk
+
+# DB migrations (optional)
+alembic

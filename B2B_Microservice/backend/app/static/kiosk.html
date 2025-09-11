@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"/><title>Kiosk</title></head>
+<body>
+  <h1>Kiosk — Bãi Demo</h1>
+  <div id="vacancy" style="font-size:48px;color:green">Đang tải...</div>
+  <div id="spots"></div>
+<script>
+async function refresh(){
+  const r = await fetch('/api/spots?site_id=site_demo_1');
+  const j = await r.json();
+  const spots = j.spots;
+  const free = spots.filter(s=>s.status==='free').length;
+  const total = spots.length;
+  document.getElementById('vacancy').innerText = `${free} / ${total} chỗ trống`;
+  const wrap = document.getElementById('spots');
+  wrap.innerHTML = spots.map(s=>`<div style="display:inline-block;margin:6px;padding:8px;border:1px solid #ccc;background:${s.status==='free'?'#d4ffd4':'#ffd4d4'}">${s.code}</div>`).join('');
+}
+refresh();
+setInterval(refresh,3000);
+</script>
+</body>
+</html>

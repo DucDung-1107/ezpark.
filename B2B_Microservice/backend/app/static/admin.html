@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>ParkWave Demo - Admin</title>
+  <style>
+    body{font-family: Arial; padding:20px}
+    .spot{display:inline-block;width:120px;height:80px;border:1px solid #ccc;margin:8px;padding:4px;text-align:center;}
+    .free{background:#d4ffd4} .occupied{background:#ffd4d4} .maintenance{background:#f0f0f0}
+  </style>
+</head>
+<body>
+  <h1>ParkWave Demo — Admin</h1>
+  <div>
+    <button onclick="refresh()">Làm mới</button>
+    <button onclick="exportCSV()">Xuất invoices CSV</button>
+  </div>
+  <h3>Spots</h3>
+  <div id="spots"></div>
+  <h3>Sessions</h3>
+  <pre id="sessions"></pre>
+
+<script>
+const API = '/api';
+
+async function refresh(){
+  const r = await fetch('/api/spots?site_id=site_demo_1');
+  const data = await r.json();
+  const wrap = document.getElementById('spots'); wrap.innerHTML='';
+  data.spots.forEach(s=>{
+    const d = document.createElement('div');
+    d.className='spot '+(s.status||'free');
+    d.innerHTML = `<strong>${s.code}</strong><div>${s.label||''}</div><div>${s.status}</div>
+      <div><button onclick="forceFree('${s.id}')">Set Free</button>
+      <button onclick="forceOcc('${s.id}')">Set Occ</button></div>`;
+    wrap.appendChild(d);
+  });
+  const res = await fetch('/api/sessions');
+  const sj = await res.json();
+  document.getElementById('sessions').textContent = JSON.stringify(sj.sessions, null, 2);
+}
+
+async function forceFree(id){
+  await fetch('/api/events/slot_update', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({event_id:'manual_'+Date.now(), site_id:'site_demo_1', spot_id:id, status:'free'})});
+  refresh();
+}
+async function forceOcc(id){
+  // simulate plate random
+  const plates = ['30A-12345','29B-54321','59C-11111'];
+  const plate = plates[Math.floor(Math.random()*plates.length)];
+  await fetch('/api/events/slot_update', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({event_id:'manual_'+Date.now(), site_id:'site_demo_1', spot_id:id, status:'occupied', plate:plate})});
+  refresh();
+}
+
+async function exportCSV(){
+  const r = await fetch('/admin/invoices?site_id=site_demo_1');
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'invoices.csv'; a.click();
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "site_id": "site_demo_1",
+  "site_name": "Bãi Demo ParkWave",
+  "spots": [
+    {"id": "S1", "code": "S1", "label": "S1"},
+    {"id": "S2", "code": "S2", "label": "S2"},
+    {"id": "S3", "code": "S3", "label": "S3"},
+    {"id": "S4", "code": "S4", "label": "S4"},
+    {"id": "S5", "code": "S5", "label": "S5"}
+  ]
+}

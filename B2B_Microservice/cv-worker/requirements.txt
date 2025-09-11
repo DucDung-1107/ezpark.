@@ -1,0 +1,25 @@
+requests
+python-dotenv
+
+# # Core CV
+# opencv-python-headless
+# numpy
+# Pillow
+
+# # Deep learning (PyTorch) - chọn bản phù hợp (CPU/GPU)
+# torch            # nếu cần pin version, cài theo hướng dẫn official (https://pytorch.org)
+# torchvision
+
+# # YOLO inference helper (ultralytics) - optional
+# ultralytics
+
+# # OCR / ANPR
+# paddleocr        # nếu muốn dùng PaddleOCR
+# easyocr          # alternative
+
+# # HTTP & utils
+# requests
+# python-dotenv
+
+# # For image processing / utilities
+# scikit-image

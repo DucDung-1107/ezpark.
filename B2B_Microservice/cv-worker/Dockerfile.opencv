@@ -1,0 +1,33 @@
+# cv-worker/Dockerfile.opencv
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
+# Install system libs needed by opencv and OCR
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libjpeg-dev \
+    libpng-dev \
+    wget \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash appuser
+WORKDIR /usr/src/app
+
+# copy and install python deps (cv heavy)
+COPY cv-worker/requirements-cv.txt ./requirements.txt
+RUN pip install --upgrade pip wheel setuptools \
+ && pip install --no-cache-dir -r ./requirements.txt
+
+# copy code and config
+COPY cv-worker ./app
+COPY spots.json /spots.json
+
+RUN chown -R appuser:appuser /usr/src/app /spots.json
+USER appuser
+
+CMD ["python", "app/worker_opencv.py"]

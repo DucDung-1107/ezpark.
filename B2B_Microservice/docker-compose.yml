@@ -1,0 +1,47 @@
+# docker-compose.yml (updated)
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app            # giúp dev: live-reload thay đổi source
+      - ./spots.json:/spots.json         # mount spots.json to root path so seed reads it as /spots.json
+    depends_on:
+      - db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: parkwave
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  cv-worker:
+    build: ./cv-worker
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    volumes:
+      - ./spots.json:/spots.json        # **CRITICAL**: mount for cv-worker (it expects /spots.json)
+    # no ports needed
+
+  payment-sandbox:
+    build: ./payment-sandbox
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
