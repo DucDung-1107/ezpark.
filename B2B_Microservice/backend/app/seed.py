@@ -4,16 +4,33 @@ from .database import engine
 from .models import Site, Spot
 from datetime import datetime
 
+def load_spots_config():
+    # Try multiple locations (mounted by docker-compose to /spots.json)
+    candidates = [
+        "/spots.json",
+        os.path.join(os.path.dirname(__file__), "..", "spots.json"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "spots.json"),
+        "./spots.json"
+    ]
+    for p in candidates:
+        try:
+            if os.path.isfile(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    doc = json.load(f)
+                print("Loaded spots.json from:", p)
+                return doc
+        except Exception as e:
+            print("Error loading spots.json from", p, ":", e)
+    print("No spots.json found in candidates:", candidates)
+    return None
+
 def seed():
     SQLModel.metadata.create_all(engine)
-    # load spots.json
-    p = os.path.join(os.path.dirname(__file__), "..", "spots.json")
-    if not os.path.exists(p):
-        print("spots.json not found")
+    doc = load_spots_config()
+    if not doc:
+        print("No spots config to seed.")
         return
-    doc = json.load(open(p, "r", encoding="utf-8"))
     site_id = doc.get("site_id", "site_demo_1")
-    # insert site and spots if not exist
     from sqlmodel import Session, select
     with Session(engine) as s:
         existing = s.exec(select(Site).where(Site.id == site_id)).first()

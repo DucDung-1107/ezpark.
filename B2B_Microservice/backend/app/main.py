@@ -5,18 +5,41 @@ from .database import engine, get_session
 from .models import *
 from .schemas import SlotUpdatePayload, PaymentWebhookPayload
 from .utils import verify_hmac, compute_invoice_for_session, generate_invoice_csv_rows
-from sqlmodel import Session, select
+from sqlmodel import Session, select, SQLModel
+from sqlalchemy.exc import OperationalError
 from datetime import datetime
 from dotenv import load_dotenv
+import time
 load_dotenv()
 
 app = FastAPI(title="ParkWave Demo Backend")
 
-# create and seed DB on startup
+def wait_for_db(timeout: int = 60, interval: float = 1.0):
+    """
+    Chờ Postgres sẵn sàng trước khi gọi create_all.
+    timeout: giây tối đa chờ
+    """
+    start = time.time()
+    while True:
+        try:
+            # thử kết nối nhanh
+            with engine.connect():
+                print("Database is ready.")
+                return
+        except Exception as e:
+            elapsed = time.time() - start
+            if elapsed >= timeout:
+                raise RuntimeError(f"Database not ready after {timeout}s") from e
+            print(f"Database not ready yet ({int(elapsed)}s elapsed). Retrying in {interval}s...")
+            time.sleep(interval)
+
+# trong event startup, dùng wait_for_db trước khi create_all / seed
 @app.on_event("startup")
 def on_startup():
+    # chờ DB sẵn sàng (tối đa 60s)
+    wait_for_db(timeout=60)
+    # tạo schema + seed (nếu cần)
     SQLModel.metadata.create_all(engine)
-    # seed initial sites & spots
     from .seed import seed
     seed()
 

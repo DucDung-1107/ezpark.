@@ -1,22 +1,22 @@
-# cv-worker/Dockerfile (sim mode)
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 
-# create non-root user
 RUN useradd --create-home --shell /bin/bash appuser
+
 WORKDIR /usr/src/app
 
-# install minimal deps
-COPY cv-worker/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip \
  && pip install --no-cache-dir -r ./requirements.txt
 
-# copy worker
-COPY cv-worker/worker.py ./worker.py
-COPY spots.json /spots.json
+# copy worker code (from cv-worker/worker.py)
+COPY worker.py ./worker.py
 
-RUN chown -R appuser:appuser /usr/src/app /spots.json
+# optional: copy any helper modules in cv-worker/
+COPY . /usr/src/app
+
+RUN chown -R appuser:appuser /usr/src/app
 USER appuser
 
 CMD ["python", "worker.py"]

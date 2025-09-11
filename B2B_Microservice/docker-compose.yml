@@ -1,17 +1,17 @@
-# docker-compose.yml (updated)
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/app:/app/app            # giúp dev: live-reload thay đổi source
-      - ./spots.json:/spots.json         # mount spots.json to root path so seed reads it as /spots.json
+      - ./spots.json:/spots.json          # mount spots config for backend
+      - ./backend/app:/usr/src/app/app    # optional dev bind mount
     depends_on:
       - db
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
     image: postgres:15
@@ -23,19 +23,28 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d parkwave -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   cv-worker:
-    build: ./cv-worker
+    build:
+      context: ./cv-worker
+      dockerfile: Dockerfile
     env_file:
       - .env
     depends_on:
       - backend
     volumes:
-      - ./spots.json:/spots.json        # **CRITICAL**: mount for cv-worker (it expects /spots.json)
-    # no ports needed
+      - ./spots.json:/spots.json         # mount spots config for cv-worker
+      - ./cv-worker:/usr/src/app         # optional dev bind mount
 
   payment-sandbox:
-    build: ./payment-sandbox
+    build:
+      context: ./payment-sandbox
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
