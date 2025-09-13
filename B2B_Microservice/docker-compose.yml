@@ -35,11 +35,13 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    volumes:
+      - ./spots.json:/spots.json
+      - ./video/sample.mp4:/video/input.mp4   # map your sample video
+    ports:
+      - "5001:5001"
     depends_on:
       - backend
-    volumes:
-      - ./spots.json:/spots.json         # mount spots config for cv-worker
-      - ./cv-worker:/usr/src/app         # optional dev bind mount
 
   payment-sandbox:
     build:

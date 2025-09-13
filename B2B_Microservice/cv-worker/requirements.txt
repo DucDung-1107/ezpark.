@@ -1,25 +1,10 @@
-requests
-python-dotenv
+# core
+opencv-python-headless==4.7.0.72
+numpy==1.26.4
+requests==2.31.0
+python-dotenv==1.0.0
+Flask==2.3.0
+Pillow==10.1.0
 
-# # Core CV
-# opencv-python-headless
-# numpy
-# Pillow
-
-# # Deep learning (PyTorch) - chọn bản phù hợp (CPU/GPU)
-# torch            # nếu cần pin version, cài theo hướng dẫn official (https://pytorch.org)
-# torchvision
-
-# # YOLO inference helper (ultralytics) - optional
-# ultralytics
-
-# # OCR / ANPR
-# paddleocr        # nếu muốn dùng PaddleOCR
-# easyocr          # alternative
-
-# # HTTP & utils
-# requests
-# python-dotenv
-
-# # For image processing / utilities
-# scikit-image
+# ultralytics (yolov8) -> installs weight manager and utilities
+ultralytics==8.1.20
